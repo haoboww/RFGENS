@@ -1,0 +1,22 @@
+torch
+torchvision
+torchaudio
+numpy==1.23.1
+matplotlib #old version for compatibility  matplotlib-3.4.3
+tqdm
+termcolor
+mitsuba==3.5.2
+smplpytorch
+diffusers
+transformers
+scipy
+ftfy
+accelerate
+transforms3d
+smplx
+trimesh
+h5py
+spacy
+chumpy
+ipykernel
+git+https://github.com/openai/CLIP.git
