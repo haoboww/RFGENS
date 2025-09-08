@@ -1,7 +1,7 @@
-# RF Genesis V1.1 (2025 Updates!)
+# RF Genesis with own data
 ### [Project Page](https://rfgen.xingyuchen.me/) | [Paper](https://xingyuchen.me/files/Xingyu.Chen_SenSys23_RFGen.pdf) 
 
-The offical implementation of [  *RF Genesis: Zero-Shot Generalization of mmWave Sensing
+The expanded implementation of [  *RF Genesis: Zero-Shot Generalization of mmWave Sensing
 through Simulation-Based Data Synthesis and Generative
 Diffusion Models*](https://rfgen.xingyuchen.me/).
 
@@ -12,29 +12,6 @@ UC San Diego.
 In SenSys 2023
 ![teaser](https://rfgen.xingyuchen.me/RFGen/pull.png)
 
-
-## Updates 2025!
-Sorry for the long wait — the RFLoRA model is finally released! Feel free to try it out.
-
-Please note that RFLoRA was a workaround developed back in 2023, before 3D diffusion models became available. In 2025, I’ll be adding support for 3D diffusion models for indoor room generation.
-
-Also, I’ve noticed that some dependencies, including MDM and Mitsuba, have updated their APIs. I’ll start maintaining this project again while also preparing for RFGenV2!
-
-
-
-## News
-📢 **June/25** - RFLoRA model released, trained under 20k images!
-
-📢 **June/25** - Experimental CUDA kernel for signal generation, reduce memory usage by 1000X!
-
-📢 **22/Jan/24** - Initial Release of RF Genesis!
-
-📢 **29/March/24** - Added the code for point-cloud processing and visualization.
-
-## To-Do List
-- [ ]  **New**  Replace Mitsuba with custom rayTracing engines.
-- [ ]  **New**  3D Diffusion including indoor environments.
-- [ ] More documentations.
 
 
 ## Quick Start
@@ -47,8 +24,8 @@ This code was tested on `Ubuntu 20.04.5 LTS` and requires:
 
 Clone the repository
 ```
-git clone https://github.com/Asixa/RF-Genesis.git
-cd RF-Genesis
+git clone https://github.com/haoboww/RFGENS
+cd RFGENS
 ```
 
 Create a conda environment.
@@ -65,6 +42,14 @@ Run a simple example.
 ```
 python run.py -o "a person walking back and forth" -e "a living room" -n "hello_rfgen"
 ```
+
+## Other：
+You can use our own data for simulator（Some details can be found in ./data_process）:
+```
+python run.py --joint-file "./my_data/joint.npy" --no-environment true --name "my_custom_motion"
+```
+
+
 
 Optional Command:
 
@@ -135,8 +120,3 @@ This code is distributed under an [MIT LICENSE](LICENSE).
 Note that our code depends on other libraries, including [CLIP](https://github.com/openai/CLIP), [SMPL](https://smpl.is.tue.mpg.de/), [MDM](https://guytevet.github.io/mdm-page/), [mmMesh](https://github.com/HavocFiXer/mmMesh) and uses datasets that each have their own respective licenses that must also be followed.
 
 
-## Other：
-You can use our own data for simulator:
-```
-python run.py --joint-file "./my_data/joint.npy" --no-environment true --name "my_custom_motion"
-```
