@@ -226,7 +226,7 @@ def create_interpolator(_frames, _pointclouds, environment_pir, frame_rate=30, r
     
 
 def generate_signal_frames(body_pirs, body_auxs, envir_pir, radar_config):
-    interpolator = create_interpolator(body_pirs, body_auxs, envir_pir, frame_rate=30)
+    interpolator = create_interpolator(body_pirs, body_auxs, envir_pir, frame_rate=10)
     total_motion_frames = len(body_pirs)
     
     radar = Radar(radar_config)

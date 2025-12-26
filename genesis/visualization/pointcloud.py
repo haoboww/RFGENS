@@ -107,6 +107,9 @@ def dopplerFFT(rangeResult,frameConfig): #
 def naive_xyz(virtual_ant, num_tx=3, num_rx=4, fft_size=64): #
     assert num_tx > 2, "need a config for more than 2 TXs"
     num_detected_obj = virtual_ant.shape[1]
+    
+    # 修复：正确计算方位角和俯仰角天线数量
+    # 对于MIMO雷达，虚拟天线阵列的组织方式取决于TX和RX的配置
     azimuth_ant = virtual_ant[:2 * num_rx, :]
     azimuth_ant_padded = np.zeros(shape=(fft_size, num_detected_obj), dtype=np.complex_)
     azimuth_ant_padded[:2 * num_rx, :] = azimuth_ant
@@ -123,10 +126,12 @@ def naive_xyz(virtual_ant, num_tx=3, num_rx=4, fft_size=64): #
     wx = 2 * np.pi / fft_size * k_max
     x_vector = wx / np.pi
 
-    # Zero pad elevation
+    # 修复：正确计算俯仰角天线数量
+    # 对于4T8R: virtual_ant[16:, :] 有 16 个元素 (num_rx * (num_tx - 2))
     elevation_ant = virtual_ant[2 * num_rx:, :]
+    elevation_size = elevation_ant.shape[0]  # 实际的俯仰天线数量
     elevation_ant_padded = np.zeros(shape=(fft_size, num_detected_obj), dtype=np.complex_)
-    elevation_ant_padded[:num_rx, :] = elevation_ant
+    elevation_ant_padded[:elevation_size, :] = elevation_ant  # 使用实际大小
 
     # Process elevation information
     elevation_fft = np.fft.fft(elevation_ant_padded, axis=0)
@@ -165,7 +170,9 @@ def frame2pointcloud(frame,pointCloudProcessCFG):
     cfarResult=np.zeros(dopplerResultInDB.shape, bool)
     if pointCloudProcessCFG.EnergyTop128:
         top_size=128
-        energyThre128=np.partition(dopplerResultInDB.ravel(), 128*256-top_size-1)[128*256-top_size-1]
+        # 修复：动态计算总bin数，而不是硬编码128*256
+        total_bins = frameConfig.numDopplerBins * frameConfig.numRangeBins
+        energyThre128=np.partition(dopplerResultInDB.ravel(), total_bins-top_size-1)[total_bins-top_size-1]
         cfarResult[dopplerResultInDB>energyThre128]=True
 
     det_peaks_indices = np.argwhere(cfarResult == True)
@@ -177,11 +184,14 @@ def frame2pointcloud(frame,pointCloudProcessCFG):
     energy=dopplerResultInDB[cfarResult==True]
 
     AOAInput = dopplerResult[:,:,cfarResult==True]
-    AOAInput = AOAInput.reshape(12,-1)
+    # 修复：动态计算虚拟天线数，而不是硬编码为12
+    num_virtual_antennas = frameConfig.numTxAntennas * frameConfig.numRxAntennas
+    AOAInput = AOAInput.reshape(num_virtual_antennas,-1)
 
     if AOAInput.shape[1]==0:
         return np.array([]).reshape(6,0)
-    x_vec, y_vec, z_vec = naive_xyz(AOAInput)   
+    # 修复：传递正确的天线数量参数
+    x_vec, y_vec, z_vec = naive_xyz(AOAInput, num_tx=frameConfig.numTxAntennas, num_rx=frameConfig.numRxAntennas)   
     
     x,y,z = x_vec*R, y_vec*R, z_vec*R
     pointCloud=np.concatenate((x,y,z,V,energy,R))
