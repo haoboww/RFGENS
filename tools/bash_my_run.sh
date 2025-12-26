@@ -1,3 +1,7 @@
+#!/bin/bash
+# Batch script for running RF-Genesis simulation on multiple joint data files
+# Usage: Run from project root directory: bash tools/bash_my_run.sh
+
 # 定义要处理的 joint-file 路径和对应的 name
 
 joint_files=(

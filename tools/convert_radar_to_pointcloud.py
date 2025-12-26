@@ -13,8 +13,9 @@ from pathlib import Path
 from typing import Tuple, List
 import argparse
 
-# 添加genesis路径
-sys.path.append(os.path.join(os.path.dirname(__file__), 'genesis'))
+# 添加genesis路径（从tools目录回到项目根目录）
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(os.path.join(project_root, 'genesis'))
 
 from genesis.raytracing.radar import Radar
 from genesis.visualization.pointcloud import PointCloudProcessCFG, frame2pointcloud
@@ -233,8 +234,8 @@ def main():
                        default='./data_process/basic_process_copy/mmbody_labels.npy',
                        help='Path to mmbody_labels.npy for pelvis positions')
     parser.add_argument('--radar_config', type=str,
-                       default='models/TI1843_config.json',
-                       help='Path to radar config file')
+                       default=None,
+                       help='Path to radar config file (default: ../models/TI1843_config.json)')
     parser.add_argument('--output_dir', type=str,
                        default='output_pointclouds/seq_0/radar',
                        help='Output directory for pointclouds')
@@ -247,6 +248,11 @@ def main():
                        help='Index of the radar frame')
     
     args = parser.parse_args()
+    
+    # 设置默认radar_config路径
+    if args.radar_config is None:
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        args.radar_config = os.path.join(project_root, 'models', 'TI1843_config.json')
     
     print("=" * 60)
     print("Radar Frames to Pointcloud Converter (FIXED VERSION)")

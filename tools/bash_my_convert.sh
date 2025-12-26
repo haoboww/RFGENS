@@ -1,8 +1,10 @@
-# python convert_radar_to_pointcloud_fixed.py --radar_frames ./output/seq_0/radar_frames.npy --output_dir output_pointclouds/sequence_0/radar
+#!/bin/bash
+# Batch script for converting multiple radar frames to point clouds
+# Usage: Run from project root directory: bash tools/bash_my_convert.sh
 
+# python convert_radar_to_pointcloud.py --radar_frames ./output/seq_0/radar_frames.npy --output_dir output_pointclouds/sequence_0/radar
 
-
-# 最多同时运行4个进程
+# 最多同时运行10个进程
 
 radar_frames=(
     "/store/bhw/codes/RF-Genesis/535/RF-Genesis/output_our_test0904/Seq_5/radar_frames.npy"
@@ -34,7 +36,7 @@ for i in "${!radar_frames[@]}"; do
     radar_frame="${radar_frames[$i]}"
     output_dir="${output_dirs[$i]}"
 
-    python convert_radar_to_pointcloud.py --radar_frames "$radar_frame" --output_dir "$output_dir"  --simple_normalize
+    python tools/convert_radar_to_pointcloud.py --radar_frames "$radar_frame" --output_dir "$output_dir"  --simple_normalize
     
     while [ "$(jobs -r | grep -c python)" -ge "$max_jobs" ]; do
         sleep 2
