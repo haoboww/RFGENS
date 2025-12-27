@@ -2,9 +2,23 @@ from tqdm import tqdm
 
 import torch
 import numpy as np
-from .radar import Radar
+from .radar import Radar as TorchRadar
 from PIL import Image
 import math
+
+# Prefer the high-performance CUDA renderer when available; fall back to the
+# existing torch implementation if import fails or is disabled.
+try:
+    import sys
+    import os
+    # Add the radar_cuda directory to the path
+    radar_cuda_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'radar_cuda')
+    if os.path.exists(radar_cuda_path):
+        sys.path.insert(0, radar_cuda_path)
+    from renderer import Radar as CUDARadar  # root-level accelerated radar
+except Exception:  # pragma: no cover - fallback path
+    CUDARadar = None
+
 torch.set_default_device('cuda')
 
 def calculate_environment_points(environment_pir):
@@ -225,11 +239,33 @@ def create_interpolator(_frames, _pointclouds, environment_pir, frame_rate=30, r
     return interpolator
     
 
-def generate_signal_frames(body_pirs, body_auxs, envir_pir, radar_config):
+def generate_signal_frames(body_pirs, body_auxs, envir_pir, radar_config, use_cuda_renderer=True):
+    """Generate radar signal frames from PIR data.
+
+    Args:
+        body_pirs: List of body PIR tensors.
+        body_auxs: List of body point cloud tensors (in scene coordinates).
+        envir_pir: Environment PIR image (optional).
+        radar_config: Path to radar config JSON or dict.
+        use_cuda_renderer: When True and slangtorch-based renderer is available, use CUDA kernel.
+    """
     interpolator = create_interpolator(body_pirs, body_auxs, envir_pir, frame_rate=10)
     total_motion_frames = len(body_pirs)
     
-    radar = Radar(radar_config)
+    # Try to use CUDA renderer first, fall back to Torch if unavailable
+    use_cuda = use_cuda_renderer and (CUDARadar is not None)
+    radar = None
+    if use_cuda:
+        try:
+            print("[RFGen] Using CUDA radar renderer (frameCuda) - Expected 5-20x speedup")
+            radar = CUDARadar(radar_config)
+        except Exception as e:  # pragma: no cover - runtime safety
+            print(f"[RFGen] CUDA renderer init failed, falling back to Torch: {e}")
+            use_cuda = False
+    
+    if radar is None:
+        print("[RFGen] Using Torch radar renderer (frameMIMO)")
+        radar = TorchRadar(radar_config)
     
     # Fix: Ensure the number of radar frames does not exceed the time range of SMPL data
     total_motion_time = total_motion_frames / 30.0  # Total duration (seconds) of SMPL data
@@ -243,7 +279,15 @@ def generate_signal_frames(body_pirs, body_auxs, envir_pir, radar_config):
     frames = []
     pointcloud_counts = []  # Add: Monitor the number of point clouds
     
-    for i in tqdm(range(total_radar_frame), desc="Generating radar frames"):
+    # Performance monitoring
+    import time
+    start_time = time.time()
+    
+    renderer_type = "CUDA" if use_cuda else "Torch"
+    print(f"[RFGen] Starting radar signal generation with {renderer_type} renderer")
+    print(f"[RFGen] Processing {total_radar_frame} radar frames from {total_motion_frames} motion frames")
+    
+    for i in tqdm(range(total_radar_frame), desc=f"Generating radar frames ({renderer_type})"):
         current_time = i * 1.0 / radar.frame_per_second
         
         # Add: Monitor the number of point clouds output by the interpolator
@@ -259,17 +303,33 @@ def generate_signal_frames(body_pirs, body_auxs, envir_pir, radar_config):
             print(f"Error in frame {i}: {e}")
             pointcloud_counts.append(0)
         
-        frame_mimo = radar.frameMIMO(interpolator, current_time)
+        # Use appropriate method based on renderer type
+        if use_cuda:
+            frame_mimo = radar.frameCuda(interpolator, current_time)
+        else:
+            frame_mimo = radar.frameMIMO(interpolator, current_time)
         frames.append(frame_mimo.cpu().numpy())
     
     frames = np.array(frames)
     
+    # Performance statistics
+    end_time = time.time()
+    total_time = end_time - start_time
+    fps = total_radar_frame / total_time if total_time > 0 else 0
+    
+    print(f"\n[RFGen] Radar signal generation completed!")
+    print(f"[RFGen] Renderer: {renderer_type}")
+    print(f"[RFGen] Total time: {total_time:.2f}s")
+    print(f"[RFGen] Processing speed: {fps:.2f} frames/sec")
+    print(f"[RFGen] Average time per frame: {total_time/total_radar_frame*1000:.1f}ms")
+    
     # Add: Output point cloud count statistics
-    print(f"Pointcloud count statistics:")
-    print(f"  Min: {min(pointcloud_counts)}")
-    print(f"  Max: {max(pointcloud_counts)}")
-    print(f"  Mean: {np.mean(pointcloud_counts):.1f}")
-    print(f"  Std: {np.std(pointcloud_counts):.1f}")
+    if pointcloud_counts:
+        print(f"\n[RFGen] Pointcloud count statistics:")
+        print(f"  Min: {min(pointcloud_counts)}")
+        print(f"  Max: {max(pointcloud_counts)}")
+        print(f"  Mean: {np.mean(pointcloud_counts):.1f}")
+        print(f"  Std: {np.std(pointcloud_counts):.1f}")
     
     return frames
 # def generate_signal_frames(body_pirs,body_auxs,envir_pir, radar_config):

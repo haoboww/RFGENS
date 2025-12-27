@@ -2,7 +2,20 @@
 # Batch script for converting multiple radar frames to point clouds
 # Usage: Run from project root directory: bash tools/bash_my_convert.sh
 
-# python convert_radar_to_pointcloud.py --radar_frames ./output/seq_0/radar_frames.npy --output_dir output_pointclouds/sequence_0/radar
+# 自动切换到项目根目录（脚本所在目录的父目录）
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+cd "$PROJECT_ROOT"
+
+# 检查convert_radar_to_pointcloud.py是否存在
+if [ ! -f "tools/convert_radar_to_pointcloud.py" ]; then
+    echo "Error: convert_radar_to_pointcloud.py not found in tools directory: $PROJECT_ROOT/tools/"
+    exit 1
+fi
+
+echo "Working directory: $PROJECT_ROOT"
+
+# python tools/convert_radar_to_pointcloud.py --radar_frames ./output/seq_0/radar_frames.npy --output_dir output_pointclouds/sequence_0/radar
 
 # 最多同时运行10个进程
 
