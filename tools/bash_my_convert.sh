@@ -20,28 +20,33 @@ echo "Working directory: $PROJECT_ROOT"
 # 最多同时运行10个进程
 
 radar_frames=(
-    "/store/bhw/codes/RF-Genesis/535/RF-Genesis/output_our_test0904/Seq_5/radar_frames.npy"
-    "/store/bhw/codes/RF-Genesis/535/RF-Genesis/output_our_test0904/Seq_6/radar_frames.npy"
-    "/store/bhw/codes/RF-Genesis/535/RF-Genesis/output_our_test0904/Seq_9/radar_frames.npy"
-    "/store/bhw/codes/RF-Genesis/535/RF-Genesis/output_our_test0904/Seq_10/radar_frames.npy"
-    "/store/bhw/codes/RF-Genesis/535/RF-Genesis/output_our_test0904/Seq_17/radar_frames.npy"
-    "/store/bhw/codes/RF-Genesis/535/RF-Genesis/output_our_test0904/Seq_24/radar_frames.npy"
-    "/store/bhw/codes/RF-Genesis/535/RF-Genesis/output_our_test0904/Seq_29/radar_frames.npy"
-    "/store/bhw/codes/RF-Genesis/535/RF-Genesis/output_our_test0904/Seq_34/radar_frames.npy"
+    "/store/bhw/codes/RF-Genesis/try/RFGENS/output/mmbody_0/radar_frames.npy"
+    "/store/bhw/codes/RF-Genesis/try/RFGENS/output/mmbody_1/radar_frames.npy"
+    "/store/bhw/codes/RF-Genesis/try/RFGENS/output/mmbody_2/radar_frames.npy"
+    "/store/bhw/codes/RF-Genesis/try/RFGENS/output/mmbody_3/radar_frames.npy"
+    "/store/bhw/codes/RF-Genesis/try/RFGENS/output/mmbody_4/radar_frames.npy"
+    "/store/bhw/codes/RF-Genesis/try/RFGENS/output/mmbody_5/radar_frames.npy"
+    "/store/bhw/codes/RF-Genesis/try/RFGENS/output/mmbody_6/radar_frames.npy"
+    "/store/bhw/codes/RF-Genesis/try/RFGENS/output/mmbody_7/radar_frames.npy"
+    "/store/bhw/codes/RF-Genesis/try/RFGENS/output/mmbody_8/radar_frames.npy"
+    "/store/bhw/codes/RF-Genesis/try/RFGENS/output/mmbody_9/radar_frames.npy"
+    "/store/bhw/codes/RF-Genesis/try/RFGENS/output/mmbody_10/radar_frames.npy"    
 )
 
 
 
-
 output_dirs=(
-    "our_test_output_pointclouds0904/sequence_5/radar"
-    "our_test_output_pointclouds0904/sequence_6/radar"
-    "our_test_output_pointclouds0904/sequence_9/radar"
-    "our_test_output_pointclouds0904/sequence_10/radar"
-    "our_test_output_pointclouds0904/sequence_17/radar"
-    "our_test_output_pointclouds0904/sequence_24/radar"
-    "our_test_output_pointclouds0904/sequence_29/radar"
-    "our_test_output_pointclouds0904/sequence_34/radar"
+    "mmbody_pointclouds/sequence_0/radar"
+    "mmbody_pointclouds/sequence_1/radar"
+    "mmbody_pointclouds/sequence_2/radar"
+    "mmbody_pointclouds/sequence_3/radar"
+    "mmbody_pointclouds/sequence_4/radar"
+    "mmbody_pointclouds/sequence_5/radar"
+    "mmbody_pointclouds/sequence_6/radar"
+    "mmbody_pointclouds/sequence_7/radar"
+    "mmbody_pointclouds/sequence_8/radar"
+    "mmbody_pointclouds/sequence_9/radar"
+    "mmbody_pointclouds/sequence_10/radar"
 )
 max_jobs=10
 
