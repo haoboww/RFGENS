@@ -173,3 +173,5 @@ output*/
 
 *.zip
 benchmark*/
+mmbody*
+*.npy

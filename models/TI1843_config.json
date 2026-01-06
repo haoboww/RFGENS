@@ -10,7 +10,7 @@
     "idle_time": 7,
     "ramp_end_time": 65,
     "chirp_per_frame": 128,
-    "frame_per_second": 30,
+    "frame_per_second": 10,
     "num_doppler_bins": 128,
     "num_range_bins": 256,
     "num_angle_bins": 64,

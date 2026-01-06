@@ -249,7 +249,7 @@ def generate_signal_frames(body_pirs, body_auxs, envir_pir, radar_config, use_cu
         radar_config: Path to radar config JSON or dict.
         use_cuda_renderer: When True and slangtorch-based renderer is available, use CUDA kernel.
     """
-    interpolator = create_interpolator(body_pirs, body_auxs, envir_pir, frame_rate=10)
+    interpolator = create_interpolator(body_pirs, body_auxs, envir_pir, frame_rate=30)
     total_motion_frames = len(body_pirs)
     
     # Try to use CUDA renderer first, fall back to Torch if unavailable
@@ -332,16 +332,3 @@ def generate_signal_frames(body_pirs, body_auxs, envir_pir, radar_config, use_cu
         print(f"  Std: {np.std(pointcloud_counts):.1f}")
     
     return frames
-# def generate_signal_frames(body_pirs,body_auxs,envir_pir, radar_config):
-#     interpolator = create_interpolator(body_pirs,body_auxs,envir_pir, frame_rate=30)
-#     total_motion_frames = len(body_pirs)
-
-#     radar = Radar(radar_config)
-
-#     total_radar_frame = int(total_motion_frames / 30 * radar.frame_per_second)
-#     frames = []
-#     for i in tqdm(range(total_radar_frame), desc="Generating radar frames"):
-#         frame_mimo = radar.frameMIMO(interpolator,i*1.0/radar.frame_per_second)
-#         frames.append(frame_mimo.cpu().numpy())
-#     frames = np.array(frames)
-#     return frames

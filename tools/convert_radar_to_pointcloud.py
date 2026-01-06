@@ -8,17 +8,37 @@
 import os
 import sys
 import numpy as np
-import matplotlib.pyplot as plt
 from pathlib import Path
 from typing import Tuple, List
 import argparse
 
 # 添加genesis路径（从tools目录回到项目根目录）
-project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(os.path.join(project_root, 'genesis'))
+# 获取脚本的绝对路径，无论从哪里运行
+script_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.dirname(script_dir)  # tools目录的父目录
+genesis_path = os.path.join(project_root, 'genesis')
+sys.path.insert(0, genesis_path)  # 使用 insert(0, ...) 确保路径在最前面
 
-from genesis.raytracing.radar import Radar
-from genesis.visualization.pointcloud import PointCloudProcessCFG, frame2pointcloud
+# 动态导入 genesis 模块
+import importlib.util
+
+# 导入 Radar 类
+radar_spec = importlib.util.spec_from_file_location("radar", os.path.join(genesis_path, "raytracing", "radar.py"))
+radar_module = importlib.util.module_from_spec(radar_spec)
+sys.modules["genesis.raytracing.radar"] = radar_module
+radar_spec.loader.exec_module(radar_module)
+Radar = radar_module.Radar
+
+# 导入 pointcloud 模块
+pointcloud_spec = importlib.util.spec_from_file_location("pointcloud", os.path.join(genesis_path, "visualization", "pointcloud.py"))
+pointcloud_module = importlib.util.module_from_spec(pointcloud_spec)
+sys.modules["genesis.visualization.pointcloud"] = pointcloud_module
+pointcloud_spec.loader.exec_module(pointcloud_module)
+PointCloudProcessCFG = pointcloud_module.PointCloudProcessCFG
+frame2pointcloud = pointcloud_module.frame2pointcloud
+
+# 延迟导入matplotlib，避免可能的初始化问题
+import matplotlib.pyplot as plt
 
 # SMPL关节名称，骨盆是第0个关节
 JOINT_NAMES = [
